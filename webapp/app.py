@@ -15,6 +15,7 @@ def users():
         #app.logger.debug(request.data)
         print >> sys.stderr, request.data
         #print_stderr(request.data)
+        return "<key>34332</key>"
 
 
 @app.route('/devices.xml', methods=['POST'])
@@ -24,14 +25,14 @@ def devices():
         print_stderr(request.data)
 
 
-@app.route('profile.xml', methods=['POST'])
+@app.route('/profile.xml', methods=['POST'])
 def profile():
     if request.method == 'POST':
         #app.logger.debug(request.data)
         print_stderr(request.data)
 
 
-@app.route('reports.xml', methods=['POST'])
+@app.route('/reports.xml', methods=['POST'])
 def reports():
     if request.method == 'POST':
         #app.logger.debug(request.data)

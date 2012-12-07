@@ -21,15 +21,24 @@ def users():
 @app.route('/devices.xml', methods=['POST'])
 def devices():
     if request.method == 'POST':
-        #app.logger.debug(request.data)
-        print_stderr(request.data)
+        print_stderr("Request Data:" + str(request.data))
+        print >> sys.stderr, "Request Data:" + str(request.data)
+        return """<?xml version="1.0" encoding="UTF-8"?>
+                    <device><key>akf7ef</key></device>"""
 
 
-@app.route('/profile.xml', methods=['POST'])
+@app.route('/profile.xml', methods=['GET'])
 def profile():
-    if request.method == 'POST':
-        #app.logger.debug(request.data)
+    if request.method == 'GET':
+        #ADD HTTP BASIC AUTH
         print_stderr(request.data)
+        print_stderr(request.args.items())
+        return """<?xml version="1.0" encoding="UTF-8"?>
+                    <user>
+                    <id>1078832</id>
+                    <key>kliyrhapg43v</key>
+                    <available_slots>1</available_slots>
+                    </user>"""
 
 
 @app.route('/reports.xml', methods=['POST'])

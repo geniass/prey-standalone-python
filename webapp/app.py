@@ -23,8 +23,12 @@ def users():
 @app.route('/devices.xml', methods=['POST'])
 def devices():
     if request.method == 'POST':
-        print_stderr("Request Data (devices.xml):" + str(request.data))
-        print >> sys.stderr, "Request Data:" + str(request.data)
+        pairs = request.data.split("&")
+
+        keyvalue = {f[0]: f[1] for f in [x.split("=") for x in pairs]}
+
+        print_stderr("Request Data (devices.xml):" + str(keyvalue))
+
         return """<?xml version="1.0" encoding="UTF-8"?>
                     <device><key>akf7ef</key></device>"""
 

@@ -3,6 +3,8 @@
 from flask import Flask, render_template, redirect, url_for, g, request
 import sys
 import requests
+import elementtree.ElementTree as ET
+from elementtree.ElementTree import XML, fromstring, tostring
 import json
 
 app = Flask(__name__)
@@ -43,6 +45,37 @@ def devices():
 def device(device_id):
     if request.method == 'GET':
         print_stderr("Get params (devices/[id].xml):" + str(request.args.items()))
+        root = ET.Element("device")
+
+        status = ET.SubElement(root, "status")
+        missing = ET.SubElement(status, "missing")
+        missing.text = "true"   # SET TO TRUE AT SOME POINT
+        device_type = ET.SubElement(status, "device_type")
+        device_type.text = "phone"
+
+        config = ET.SubElement(root, "configuration")
+        curr_release = ET.SubElement(config, "current_release")
+        curr_release.text = "0.5.3"
+        delay = ET.SubElement(config, "delay")
+        delay.text = "20"
+        post_url = ET.SubElement(config, "post_url")
+        post_url.text = "https://prey-geniass.dotcloud.com/devices/" + device_id + "/reports.xml"
+        auto_update = ET.SubElement(config, "auto_update")
+        auto_update.text = "false"
+
+        modules = ET.SubElement(root, "modules")
+        system_module = ET.SubElement(modules, "module",
+                attrib={"type": "action", "active": "true",
+                    "name": "system", "version": "1.5"})
+        network_module = ET.SubElement(modules, "module",
+                attrib={"type":"report", "active": "true",
+                    "name": "network", "version": "1.5"})
+        geo_module = ET.SubElement(modules, "module",
+                attrib={"type":"report", "active": "true",
+                    "name": "geo", "version": "1.5"})
+
+        print_stderr(tostring(root))
+        return tostring(root)
 
     elif request.method == 'POST':
         pairs = request.data.split("&")
@@ -50,9 +83,12 @@ def device(device_id):
 
         print_stderr("Post Data (devices/[id].xml):" + str(keyvalue))
 
-        print_stderr("REG: " + str(keyvalue['device%5Bnotification_id%5D']))
-        global regId
-        regId = keyvalue['device%5Bnotification_id%5D']
+        if 'device%5Bnotification_id%5D' in keyvalue:
+            global regId
+            regId = keyvalue['device%5Bnotification_id%5D']
+            print_stderr("REG: " + str(keyvalue['device%5Bnotification_id%5D']))
+        elif 'device%5Bmissing%5D' in keyvalue:
+            print_stderr("Device missing changed to: " + keyvalue['device%5Bmissing%5D'])
 
     elif request.method == 'PUT':
         print_stderr("Put Data (devices/[id].xml):" + str(request.data))
@@ -103,6 +139,8 @@ def reports():
     if request.method == 'POST':
         #app.logger.debug(request.data)
         print_stderr(request.data)
+
+    return "<div>Hi</div>"
 
 
 

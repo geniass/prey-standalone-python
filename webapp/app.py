@@ -134,16 +134,6 @@ def profile():
                     </user>"""
 
 
-@app.route('/reports.xml', methods=['POST'])
-def reports():
-    if request.method == 'POST':
-        #app.logger.debug(request.data)
-        print_stderr(request.data)
-
-    return "<div>Hi</div>"
-
-
-
 def print_stderr(message):
     print >> sys.stderr, message
 

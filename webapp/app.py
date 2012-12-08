@@ -50,8 +50,9 @@ def device(device_id):
 
         print_stderr("Post Data (devices/[id].xml):" + str(keyvalue))
 
+        print_stderr("REG: " + str(keyvalue['device%5Bnotification_id%5D']))
         global regId
-        regId = keyvalue["device[notification_id]"]
+        regId = keyvalue['device%5Bnotification_id%5D']
 
     elif request.method == 'PUT':
         print_stderr("Put Data (devices/[id].xml):" + str(request.data))
@@ -72,13 +73,16 @@ def reports(device_id):
 
 @app.route('/devices/<device_id>/missing')
 def missing(device_id):
+    print_stderr("Reg ID: " + str(regId))
     headers = {"content-type": "application/json",
                     "Authorization": "key=" + str(API_KEY)}
-    payload = {"registration_ids": regId, 
-                "data": {"event":"message",
-                    "data":{"type":"text","body":"run_once","key":device_id}}}
+    payload = {"registration_ids": [regId], 
+            "data": {"data": {"event":"message",
+                    "data":{"type":"text","body":"run_once","key":device_id}}}}
 
     r = requests.post(GCM_URL, json.dumps(payload), headers=headers)
+
+    return "<div>" + r.text + "</div>"
 
 
 @app.route('/profile.xml', methods=['GET'])

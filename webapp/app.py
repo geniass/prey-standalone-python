@@ -8,7 +8,7 @@ from elementtree.ElementTree import XML, fromstring, tostring
 import json
 
 app = Flask(__name__)
-regId = None
+regId = "APA91bGOKc5MucM4tXVENh7bbUSCveszrctTIfhjFFGNz08NSWCpBhkL2e8LfRU3MhNRuQNdFcNYMiDnXfLPmgBXAgG9NYbDB9IYaFrau0tCvkAbSql6VrSLeaTYWze_wiVMHJUk1JRH"
 
 GCM_URL = "https://android.googleapis.com/gcm/send"
 API_KEY = "AIzaSyCGDI006zQ4V0I-GKYVakVkEBD8Gp0JfRI"
@@ -73,6 +73,10 @@ def device(device_id):
         geo_module = ET.SubElement(modules, "module",
                 attrib={"type":"report", "active": "true",
                     "name": "geo", "version": "1.5"})
+        calls_module = ET.SubElement(modules, "module",
+                attrib={"type":"report", "active": "true",
+                    "name": "calls", "version": "1.5"})
+
 
         print_stderr(tostring(root))
         return tostring(root)
@@ -96,14 +100,14 @@ def device(device_id):
     return "<data></data>"
 
 
-@app.route('/devices/<device_id>/reports.xml')
+@app.route('/devices/<device_id>/reports.xml', methods=['GET', 'POST'])
 def reports(device_id):
     if request.method == 'GET':
         print_stderr("Get params (devices/[id].xml):" + str(request.args.items()))
     elif request.method == 'POST':
         print_stderr("Post Data (devices/[id].xml):" + str(request.data))
-    elif request.method == 'PUT':
-        print_stderr("Put Data (devices/[id].xml):" + str(request.data))
+    #elif request.method == 'PUT':
+    #    print_stderr("Put Data (devices/[id].xml):" + str(request.data))
     return "<data></data>"
 
 

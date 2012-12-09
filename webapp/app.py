@@ -6,6 +6,8 @@ import requests
 import elementtree.ElementTree as ET
 from elementtree.ElementTree import XML, fromstring, tostring
 import json
+import pymongo
+import hashlib, uuid
 
 app = Flask(__name__)
 regId = "APA91bGOKc5MucM4tXVENh7bbUSCveszrctTIfhjFFGNz08NSWCpBhkL2e8LfRU3MhNRuQNdFcNYMiDnXfLPmgBXAgG9NYbDB9IYaFrau0tCvkAbSql6VrSLeaTYWze_wiVMHJUk1JRH"
@@ -13,27 +15,67 @@ regId = "APA91bGOKc5MucM4tXVENh7bbUSCveszrctTIfhjFFGNz08NSWCpBhkL2e8LfRU3MhNRuQN
 GCM_URL = "https://android.googleapis.com/gcm/send"
 API_KEY = "AIzaSyCGDI006zQ4V0I-GKYVakVkEBD8Gp0JfRI"
 
+with open('/home/dotcloud/environment.json') as f:
+    env = json.load(f)
+
+connection = pymongo.MongoClient(host=env['DOTCLOUD_PREYDB_MONGODB_HOST'], port=int(env['DOTCLOUD_PREYDB_MONGODB_PORT']))
+db = connection.preydb
+db.authenticate(env['PREYDB_USER'], env['PREYDB_PWD'])
+users_collection = db.users
+
+
 @app.route('/')
 def homepage():
     print >> sys.stderr, "HOMEPAGE!"
     return render_template('homepage.html')
 
 
+#Don't use yet
 @app.route('/users.xml', methods=['POST'])
 def users():
     if request.method == 'POST':
-        #app.logger.debug(request.data)
-        print >> sys.stderr, request.data
-        #print_stderr(request.data)
-        return "<key>34332</key>"
+        keyvalue = prey_params_dict(request.data)
+        print_stderr("POST Data (users.xml): " + str(keyvalue))
+
+        user_dict = dict(dict.fromkeys(["name", "email", "pwd"], None))
+
+        result = "<errors><error>%s</error><errors>"
+
+        if "user%5Bname%5D" in keyvalue:
+            user_dict['name'] = keyvalue["user%5Bname%5D"]
+        if "user%5Bemail%5D" in keyvalue:
+            user_dict['email'] = keyvalue["user%5Bemail%5D"]
+        if "user%5Bpassword%5D" in keyvalue:
+            user_dict['pwd'] = keyvalue["user%5Bpassword%5D"]
+
+        if all(x is not None for x in user_dict):
+                #VERIFY PWD ETC
+                user_id = users_collection.find(spec={"email": user_dict['email']}, fields=["_id"])
+                if user_id is None:
+                    #USER DOES NOT EXIST
+                    user_dict['salt'] = uuid.uuid4().bytes
+                    user_dict['pwd'] = hashlib.sha512(user_dict['pwd'] + user_dict['salt']).digest()
+                    #I am sure this is a really bad idea (api_key is also the salt)
+                    user_dict['api_key'] = user_dict['salt']
+                    users_collection.insert(user_dict)
+
+                    result = "<key>" + user_dict['salt'] + "</key>"
+
+                else:
+                    result = result % ("That email address is already registered")
+
+        else:
+            result = result % ("Please enter valid details")
+
+        print_stderr(result)
+        return result
 
 
 """This stuff's all hardcoded for now"""
 @app.route('/devices.xml', methods=['POST'])
 def devices():
     if request.method == 'POST':
-        pairs = request.data.split("&")
-        keyvalue = {f[0]: f[1] for f in [x.split("=") for x in pairs]}
+        keyvalue = prey_params_dict(request.data)
 
         print_stderr("Request Data (devices.xml):" + str(keyvalue))
 
@@ -77,13 +119,14 @@ def device(device_id):
                 attrib={"type":"report", "active": "true",
                     "name": "calls", "version": "1.5"})
 
-
         print_stderr(tostring(root))
         return tostring(root)
 
     elif request.method == 'POST':
-        pairs = request.data.split("&")
-        keyvalue = {f[0]: f[1] for f in [x.split("=") for x in pairs]}
+        #pairs = request.data.split("&")
+        #keyvalue = {f[0]: f[1] for f in [x.split("=") for x in pairs]}
+        keyvalue = prey_params_dict(request.data)
+
 
         print_stderr("Post Data (devices/[id].xml):" + str(keyvalue))
 
@@ -140,6 +183,11 @@ def profile():
 
 def print_stderr(message):
     print >> sys.stderr, message
+
+
+def prey_params_dict(prey_params):
+        pairs = prey_params.split("&")
+        return {f[0]: f[1] for f in [x.split("=") for x in pairs]}
 
 
 if __name__ == '__main__':

@@ -37,7 +37,7 @@ def users():
         keyvalue = prey_params_dict(request.data)
         print_stderr("POST Data (users.xml): " + str(keyvalue))
 
-        user_dict = dict(dict.fromkeys(["name", "email", "pwd"], None))
+        user_dict = dict(dict.fromkeys(['name', 'email', 'pwd'], None))
 
         result = "<errors><error>%s</error><errors>"
 
@@ -50,11 +50,17 @@ def users():
 
         if all(x is not None for x in user_dict):
                 #VERIFY PWD ETC
-                user_id = users_collection.find(spec={"email": user_dict['email']}, fields=["_id"])
+                user_id = users_collection.find_one({"email": user_dict['email']})  # , fields=["_id"])
+                print_stderr("User ID: " + str(user_id))
                 if user_id is None:
                     #USER DOES NOT EXIST
+                    print_stderr("USer does not exist")
                     user_dict['salt'] = uuid.uuid4().bytes
+                    #user_dict['salt'] = "ejfn8w4yrw3y23478yfehf234y"
+                    print_stderr(user_dict['salt'])
+                    print_stderr(hashlib.sha512(user_dict['pwd'] + user_dict['salt']))
                     user_dict['pwd'] = hashlib.sha512(user_dict['pwd'] + user_dict['salt']).digest()
+                    print_stderr(user_dict['pwd'])
                     #I am sure this is a really bad idea (api_key is also the salt)
                     user_dict['api_key'] = user_dict['salt']
                     users_collection.insert(user_dict)

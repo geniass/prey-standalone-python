@@ -7,7 +7,10 @@ import elementtree.ElementTree as ET
 from elementtree.ElementTree import XML, fromstring, tostring
 import json
 import pymongo
-import hashlib, uuid
+import hashlib
+import uuid
+import string
+import random
 
 app = Flask(__name__)
 regId = "APA91bGOKc5MucM4tXVENh7bbUSCveszrctTIfhjFFGNz08NSWCpBhkL2e8LfRU3MhNRuQNdFcNYMiDnXfLPmgBXAgG9NYbDB9IYaFrau0tCvkAbSql6VrSLeaTYWze_wiVMHJUk1JRH"
@@ -22,6 +25,7 @@ connection = pymongo.MongoClient(host=env['DOTCLOUD_PREYDB_MONGODB_HOST'], port=
 db = connection.preydb
 db.authenticate(env['PREYDB_USER'], env['PREYDB_PWD'])
 users_collection = db.users
+devices_collection = db.devices
 
 
 @app.route('/')
@@ -81,10 +85,32 @@ def users():
 @app.route('/devices.xml', methods=['POST'])
 def devices():
     if request.method == 'POST':
+        print_stderr("POST data (devices.xml): " + str(request.data))
         keyvalue = prey_params_dict(request.data)
 
         print_stderr("Request Data (devices.xml):" + str(keyvalue))
 
+        def random_string(length):
+            # Generate random ascii string (5 characters)
+            return ''.join(random.choice(string.ascii_uppercase + string.digits)
+                    for x in range(length))
+
+            #Holy shit
+            while True:
+                device_id = random_string(5)
+                if devices_collection.find_one({"device_id": device_id}) is None:
+                    if "device%5Bmodel_name%5D" in keyvalue:
+                        device['model'] = keyvalue["device%5Bmodel_name%5D"]
+                    if "device%5Bvendor_name%5D" in keyvalue:
+                        device['vendor'] = keyvalue["device%5Bvendor_name%5D"]
+                    if "device%5Bactivation_phrase%5D" in keyvalue:
+                        device['activation_phrase'] = keyvalue["device%5Bactivation_phrase%5D"]
+                    if "device%5Bdeactivation_phrase%5D" in keyvalue:
+                        device['activation_phrase'] = keyvalue["device%5Bdeactivation_phrase%5D"]
+
+
+                    #device = {"device_id":device_id, "model":}
+                
         return """<?xml version="1.0" encoding="UTF-8"?>
                     <device><key>akf7ef</key></device>"""
 

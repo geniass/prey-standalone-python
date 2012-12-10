@@ -7,13 +7,13 @@ import elementtree.ElementTree as ET
 from elementtree.ElementTree import XML, fromstring, tostring
 import json
 import pymongo
-import hashlib
+import bcrypt
 import uuid
 import string
 import random
 
 app = Flask(__name__)
-regId = "APA91bGOKc5MucM4tXVENh7bbUSCveszrctTIfhjFFGNz08NSWCpBhkL2e8LfRU3MhNRuQNdFcNYMiDnXfLPmgBXAgG9NYbDB9IYaFrau0tCvkAbSql6VrSLeaTYWze_wiVMHJUk1JRH"
+#regId = "APA91bGOKc5MucM4tXVENh7bbUSCveszrctTIfhjFFGNz08NSWCpBhkL2e8LfRU3MhNRuQNdFcNYMiDnXfLPmgBXAgG9NYbDB9IYaFrau0tCvkAbSql6VrSLeaTYWze_wiVMHJUk1JRH"
 
 GCM_URL = "https://android.googleapis.com/gcm/send"
 API_KEY = "AIzaSyCGDI006zQ4V0I-GKYVakVkEBD8Gp0JfRI"
@@ -58,18 +58,11 @@ def users():
                 print_stderr("User ID: " + str(user_id))
                 if user_id is None:
                     #USER DOES NOT EXIST
-                    print_stderr("USer does not exist")
-                    user_dict['salt'] = uuid.uuid4().bytes
-                    #user_dict['salt'] = "ejfn8w4yrw3y23478yfehf234y"
-                    print_stderr(user_dict['salt'])
-                    print_stderr(hashlib.sha512(user_dict['pwd'] + user_dict['salt']))
-                    user_dict['pwd'] = hashlib.sha512(user_dict['pwd'] + user_dict['salt']).digest()
-                    print_stderr(user_dict['pwd'])
-                    #I am sure this is a really bad idea (api_key is also the salt)
-                    user_dict['api_key'] = user_dict['salt']
+                    user_dict['pwd'] = bcrypt.hashpw(user_dict['pwd'], bcrypt.gensalt())
+                    user_dict['api_key'] = uuid.uuid4().hex
                     users_collection.insert(user_dict)
 
-                    result = "<key>" + user_dict['salt'] + "</key>"
+                    result = "<key>" + user_dict['api_key'] + "</key>"
 
                 else:
                     result = result % ("That email address is already registered")
@@ -102,12 +95,6 @@ def devices():
 
         print_stderr("Request Data (devices.xml):" + str(keyvalue))
 
-        def random_string(length):
-            # Generate random ascii string (5 characters)
-            # There are less digits than letters so add digits twice
-            return ''.join(random.choice(string.ascii_lowercase + string.digits + string.digits)
-                    for x in range(length))
-
         #Holy shit
         while True:
             device_id = random_string(5)
@@ -139,7 +126,7 @@ def devices():
                     <device><key>""" + device_id + """</key></device>"""
 
 
-@app.route('/devices/<device_id>.xml', methods=['GET', 'POST', 'PUT'])
+@app.route('/devices/<device_id>.xml', methods=['GET', 'POST', 'DELETE'])
 def device(device_id):
     if request.method == 'GET':
         print_stderr("Get params (devices/[id].xml):" + str(request.args.items()))
@@ -179,22 +166,29 @@ def device(device_id):
         return tostring(root)
 
     elif request.method == 'POST':
-        #pairs = request.data.split("&")
-        #keyvalue = {f[0]: f[1] for f in [x.split("=") for x in pairs]}
         keyvalue = prey_params_dict(request.data)
-
+        device = {}
 
         print_stderr("Post Data (devices/[id].xml):" + str(keyvalue))
 
         if 'device%5Bnotification_id%5D' in keyvalue:
-            global regId
-            regId = keyvalue['device%5Bnotification_id%5D']
-            print_stderr("REG: " + str(keyvalue['device%5Bnotification_id%5D']))
-        elif 'device%5Bmissing%5D' in keyvalue:
-            print_stderr("Device missing changed to: " + keyvalue['device%5Bmissing%5D'])
+            device['notification_id'] = keyvalue['device%5Bnotification_id%5D']
+            print_stderr("REG: " + str(device['notification_id']))
+        if 'device%5Bmissing%5D' in keyvalue:
+            device['missing'] = keyvalue['device%5Bmissing%5D']
+            print_stderr("Device missing changed to: " + device['missing'])
+        if 'api_key' in keyvalue:
+            device['api_key'] = keyvalue['api_key']
 
-    elif request.method == 'PUT':
-        print_stderr("Put Data (devices/[id].xml):" + str(request.data))
+        _id = devices_collection.find_one({"api_key": device['api_key'],
+                                            "device_id": device_id})['_id']
+        if _id is not None:
+            print_stderr("Updating DB: " + str(device))
+            devices_collection.update({"_id": _id}, {"$set": device}, upsert=True)
+
+    elif request.method == 'DELETE':
+        print_stderr("DELETE Data (devices/[id].xml):" + str(request.data))
+        devices_collection.remove({"device_id": device_id})
 
     return "<data></data>"
 
@@ -210,18 +204,27 @@ def reports(device_id):
     return "<data></data>"
 
 
+#Needs some authentication
 @app.route('/devices/<device_id>/missing')
 def missing(device_id):
-    print_stderr("Reg ID: " + str(regId))
-    headers = {"content-type": "application/json",
-                    "Authorization": "key=" + str(API_KEY)}
-    payload = {"registration_ids": [regId], 
-            "data": {"data": {"event":"message",
-                    "data":{"type":"text","body":"run_once","key":device_id}}}}
+    device = devices_collection.find_one({"device_id": device_id})
+    print_stderr(device)
 
-    r = requests.post(GCM_URL, json.dumps(payload), headers=headers)
+    if device is not None:
+        regId = device['notification_id']
 
-    return "<div>" + r.text + "</div>"
+        print_stderr("Reg ID: " + str(regId))
+        headers = {"content-type": "application/json",
+                        "Authorization": "key=" + str(API_KEY)}
+        payload = {"registration_ids": [regId], 
+                "data": {"data": {"event":"message",
+                        "data":{"type":"text","body":"run_once","key":device_id}}}}
+
+        r = requests.post(GCM_URL, json.dumps(payload), headers=headers)
+
+        return "<div>" + r.text + "</div>"
+    else:
+        return "<div>This device is not in the database</div>"
 
 
 @app.route('/profile.xml', methods=['GET'])
@@ -244,6 +247,14 @@ def print_stderr(message):
 def prey_params_dict(prey_params):
         pairs = prey_params.split("&")
         return {f[0]: f[1] for f in [x.split("=") for x in pairs]}
+
+
+def random_string(length):
+        # Generate random ascii string (5 characters)
+        # There are less digits than letters so add digits twice
+        return ''.join(random.choice(string.ascii_lowercase + string.digits + string.digits)
+                for x in range(length))
+
 
 
 if __name__ == '__main__':

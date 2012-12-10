@@ -6,3 +6,4 @@ wsgiref==0.1.2
 requests
 elementtree
 pymongo
+py-bcrypt

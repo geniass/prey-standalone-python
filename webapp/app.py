@@ -81,38 +81,62 @@ def users():
         return result
 
 
-"""This stuff's all hardcoded for now"""
+"""This stuff's all hardcoded for now
+Crap, nothing stops someone from ading a device to someone else's
+account. Oh well"""
 @app.route('/devices.xml', methods=['POST'])
 def devices():
     if request.method == 'POST':
-        print_stderr("POST data (devices.xml): " + str(request.data))
-        keyvalue = prey_params_dict(request.data)
+        
+        if not request.data:
+            data = request.form.keys()[0]
+            print
+        else:
+            data = request.data
+
+        print_stderr("POST data (devices.xml): " + str(data))
+ 
+        keyvalue = prey_params_dict(data)
+        device = {}
+        device_id = None
 
         print_stderr("Request Data (devices.xml):" + str(keyvalue))
 
         def random_string(length):
             # Generate random ascii string (5 characters)
-            return ''.join(random.choice(string.ascii_uppercase + string.digits)
+            # There are less digits than letters so add digits twice
+            return ''.join(random.choice(string.ascii_lowercase + string.digits + string.digits)
                     for x in range(length))
 
-            #Holy shit
-            while True:
-                device_id = random_string(5)
-                if devices_collection.find_one({"device_id": device_id}) is None:
-                    if "device%5Bmodel_name%5D" in keyvalue:
-                        device['model'] = keyvalue["device%5Bmodel_name%5D"]
-                    if "device%5Bvendor_name%5D" in keyvalue:
-                        device['vendor'] = keyvalue["device%5Bvendor_name%5D"]
-                    if "device%5Bactivation_phrase%5D" in keyvalue:
-                        device['activation_phrase'] = keyvalue["device%5Bactivation_phrase%5D"]
-                    if "device%5Bdeactivation_phrase%5D" in keyvalue:
-                        device['activation_phrase'] = keyvalue["device%5Bdeactivation_phrase%5D"]
+        #Holy shit
+        while True:
+            device_id = random_string(5)
+            if devices_collection.find_one({"device_id": device_id}) is None:
+                if "device%5Bmodel_name%5D" in keyvalue:
+                    device['model'] = keyvalue["device%5Bmodel_name%5D"]
+                if "device%5Bvendor_name%5D" in keyvalue:
+                    device['vendor'] = keyvalue["device%5Bvendor_name%5D"]
+                if "device%5Bactivation_phrase%5D" in keyvalue:
+                    device['activation_phrase'] = keyvalue["device%5Bactivation_phrase%5D"].replace("%20", " ")
+                if "device%5Bdeactivation_phrase%5D" in keyvalue:
+                    device['deactivation_phrase'] = keyvalue["device%5Bdeactivation_phrase%5D"].replace("%20", " ")
+                if "device%5Bos_version%5D" in keyvalue:
+                    device['os_version'] = keyvalue["device%5Bos_version%5D"]
+                if "device%5Bos%5D" in keyvalue:
+                    device['os'] = keyvalue["device%5Bos%5D"]
+                if "api_key" in keyvalue:
+                    device['api_key'] = keyvalue["api_key"]
+                if "device%5Bphysical_address%5D" in keyvalue:
+                    device['imei'] = keyvalue["device%5Bphysical_address%5D"]
 
+                device['device_id'] = device_id
+                device['missing'] = False
+                devices_collection.save(device)
 
-                    #device = {"device_id":device_id, "model":}
-                
+                break
+
         return """<?xml version="1.0" encoding="UTF-8"?>
-                    <device><key>akf7ef</key></device>"""
+                    <device><key>""" + device_id + """</key></device>"""
 
 
 @app.route('/devices/<device_id>.xml', methods=['GET', 'POST', 'PUT'])
@@ -123,7 +147,7 @@ def device(device_id):
 
         status = ET.SubElement(root, "status")
         missing = ET.SubElement(status, "missing")
-        missing.text = "true"   # SET TO TRUE AT SOME POINT
+        missing.text = "true"   # True because it only GETs this page if it is missing
         device_type = ET.SubElement(status, "device_type")
         device_type.text = "phone"
 

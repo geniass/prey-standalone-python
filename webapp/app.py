@@ -11,6 +11,7 @@ import bcrypt
 import uuid
 import string
 import random
+import datetime
 
 app = Flask(__name__)
 #regId = "APA91bGOKc5MucM4tXVENh7bbUSCveszrctTIfhjFFGNz08NSWCpBhkL2e8LfRU3MhNRuQNdFcNYMiDnXfLPmgBXAgG9NYbDB9IYaFrau0tCvkAbSql6VrSLeaTYWze_wiVMHJUk1JRH"
@@ -21,17 +22,19 @@ API_KEY = "AIzaSyCGDI006zQ4V0I-GKYVakVkEBD8Gp0JfRI"
 with open('/home/dotcloud/environment.json') as f:
     env = json.load(f)
 
-connection = pymongo.MongoClient(host=env['DOTCLOUD_PREYDB_MONGODB_HOST'], port=int(env['DOTCLOUD_PREYDB_MONGODB_PORT']))
+#connection = pymongo.MongoClient(host=env['DOTCLOUD_PREYDB_MONGODB_HOST'], port=int(env['DOTCLOUD_PREYDB_MONGODB_PORT']))
+connection = pymongo.MongoClient(env['PREYDB_URL'])
 db = connection.preydb
-db.authenticate(env['PREYDB_USER'], env['PREYDB_PWD'])
+#db.authenticate(env['PREYDB_USER'], env['PREYDB_PWD'])
 users_collection = db.users
 devices_collection = db.devices
+reports_collection = db.reports
 
 
 @app.route('/')
 def homepage():
     print >> sys.stderr, "HOMEPAGE!"
-    return render_template('homepage.html')
+    return render_template('index.html')
 
 
 #Don't use yet
@@ -83,7 +86,6 @@ def devices():
         
         if not request.data:
             data = request.form.keys()[0]
-            print
         else:
             data = request.data
 
@@ -158,9 +160,9 @@ def device(device_id):
         geo_module = ET.SubElement(modules, "module",
                 attrib={"type":"report", "active": "true",
                     "name": "geo", "version": "1.5"})
-        calls_module = ET.SubElement(modules, "module",
-                attrib={"type":"report", "active": "true",
-                    "name": "calls", "version": "1.5"})
+        #calls_module = ET.SubElement(modules, "module",
+        #        attrib={"type":"report", "active": "true",
+        #            "name": "calls", "version": "1.5"})
 
         print_stderr(tostring(root))
         return tostring(root)
@@ -197,11 +199,40 @@ def device(device_id):
 def reports(device_id):
     if request.method == 'GET':
         print_stderr("Get params (devices/[id].xml):" + str(request.args.items()))
+        
     elif request.method == 'POST':
         print_stderr("Post Data (devices/[id].xml):" + str(request.data))
+        if not request.data:
+            data = request.form.keys()[0]
+        else:
+            data = request.data
+
+        keyvalue = prey_params_dict(data)
+
+        report = {}
+
+        #GEO LOCATION
+        if 'geo%5Blat%5D' in keyvalue:
+            report['latitude'] = keyvalue['geo%5Blat%5D']
+        if 'geo%5Blng%5D' in keyvalue:
+            report['longitude'] = keyvalue['geo%5Blng%5D']
+        if 'geo%5Balt%5D' in keyvalue:
+            report['altitude'] = keyvalue['geo%5Balt%5D']
+        if 'geo%5Bacc%5D' in keyvalue:
+            report['accuracy'] = keyvalue['geo%5Bacc%5D']
+
+        report['utc_time'] = datetime.datetime.utcnow()
+
+        reports_collection.save(report)
+
     #elif request.method == 'PUT':
     #    print_stderr("Put Data (devices/[id].xml):" + str(request.data))
     return "<data></data>"
+
+
+@app.route('/reports')
+def reports():
+    return render_template('reports.html')
 
 
 #Needs some authentication

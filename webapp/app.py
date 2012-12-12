@@ -232,7 +232,7 @@ def reports(device_id):
 
 @app.route('/reports')
 def reports():
-    return render_template('reports.html')
+    return render_template('reports_basic.html')
 
 
 #Needs some authentication

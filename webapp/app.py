@@ -33,8 +33,8 @@ reports_collection = db.reports
 
 @app.route('/')
 def homepage():
-    print >> sys.stderr, "HOMEPAGE!"
-    return render_template('index.html')
+    devices = devices_collection.find()
+    return render_template('index.html', devices=devices)
 
 
 #Don't use yet
@@ -196,11 +196,14 @@ def device(device_id):
 
 
 @app.route('/devices/<device_id>/reports.xml', methods=['GET', 'POST'])
-def reports(device_id):
+def reports_xml(device_id):
     if request.method == 'GET':
         print_stderr("Get params (devices/[id].xml):" + str(request.args.items()))
-        
+        reports = reports_collection.find({'device_id': device_id})
+        return render_template('reports_basic.html', reports=reports)
+
     elif request.method == 'POST':
+        print_stderr("reports.xml")
         print_stderr("Post Data (devices/[id].xml):" + str(request.data))
         if not request.data:
             data = request.form.keys()[0]
@@ -223,16 +226,13 @@ def reports(device_id):
 
         report['utc_time'] = datetime.datetime.utcnow()
 
+        report['device_id'] = device_id
+
         reports_collection.save(report)
 
     #elif request.method == 'PUT':
     #    print_stderr("Put Data (devices/[id].xml):" + str(request.data))
     return "<data></data>"
-
-
-@app.route('/reports')
-def reports():
-    return render_template('reports_basic.html')
 
 
 #Needs some authentication

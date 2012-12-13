@@ -28,7 +28,7 @@ jQuery(function($) {
     $('a[href="#"]').click(function(){
         id = $(this).attr('id')
         alert(id);
-        $.get("../../" + "/getreport" + "?id=" + id, function(data,status){
+        $.get("../.." + "/getreport" + "?id=" + id, function(data,status){
             alert(data);
             //update map
         });

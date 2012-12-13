@@ -242,8 +242,7 @@ def getreport():
         print_stderr("Get params (getreport):" + str(request.args.items()))
         if 'id' in params:
             print_stderr(params['id'])
-            #return reports_collection.find_one(params['id'])
-            return """{"lng":23, "lat":-12}"""
+            return reports_collection.find_one({"device_id": params['id']})
 
 
 #Needs some authentication

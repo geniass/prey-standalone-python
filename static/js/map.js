@@ -30,8 +30,8 @@ jQuery(function($) {
         alert(id);
         $.get(window.location.host + "/getreport" + "?id=" + id, function(data,status){
             alert(data);
-//update map
-        }
+            //update map
+        });
     });
 
 });

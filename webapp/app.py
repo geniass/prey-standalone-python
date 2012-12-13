@@ -200,6 +200,7 @@ def reports_xml(device_id):
     if request.method == 'GET':
         print_stderr("Get params (devices/[id].xml):" + str(request.args.items()))
         reports = reports_collection.find({'device_id': device_id})
+        print_stderr(reports[0])
         return render_template('reports_basic.html', reports=reports)
 
     elif request.method == 'POST':

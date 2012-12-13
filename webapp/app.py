@@ -239,10 +239,9 @@ def reports_xml(device_id):
 def getreport():
     if request.method == 'GET':
         params = request.args.items()
-        if params:
-            print_stderr("Get params (devices/[id].xml):" + str(request.args.items()))
-            if 'id' in params:
-                return reports_collection.find_one(params['id'])
+        print_stderr("Get params (devices/[id].xml):" + str(request.args.items()))
+        if 'id' in params:
+            return reports_collection.find_one(params['id'])
 
 
 #Needs some authentication

@@ -238,8 +238,8 @@ def reports_xml(device_id):
 @app.route('/getreport')
 def getreport():
     if request.method == 'GET':
-        params = request.args.items()
-        print_stderr("Get params (devices/[id].xml):" + str(request.args.items()))
+        params = request.args
+        print_stderr("Get params (getreport):" + str(request.args.items()))
         if 'id' in params:
             return reports_collection.find_one(params['id'])
 

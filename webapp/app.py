@@ -242,8 +242,9 @@ def getreport():
         params = request.args
         print_stderr("Get params (getreport):" + str(request.args.items()))
         if 'id' in params:
-            print_stderr(params['id'])
-            return reports_collection.find_one({"_id": ObjectId(params['id'])})
+            report = reports_collection.find_one({"_id": ObjectId(params['id'])})
+            print_stderr(report)
+            return report
 
 
 #Needs some authentication

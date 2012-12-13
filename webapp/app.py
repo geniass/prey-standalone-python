@@ -244,7 +244,7 @@ def getreport():
         if 'id' in params:
             report = reports_collection.find_one({"_id": ObjectId(params['id'])})
             print_stderr(report)
-            return report
+            return json.dumps(report)
 
 
 #Needs some authentication

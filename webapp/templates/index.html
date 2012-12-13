@@ -1,9 +1,7 @@
 {% extends "bootstrap.html" %}
-
 {% block head %}
 <title>Prey Standalone - Home</title>
 {% endblock head %}
-
 {% block body %}
 {% for device in devices %}
 <div class="row-fluid show-grid">Device ID: {{ device['device_id'] }}</div>

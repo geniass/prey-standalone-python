@@ -25,5 +25,14 @@ jQuery(function($) {
     $('#map_canvas').css('height', (h - offsetTop));
     }).resize();
 
+    $('a[href="#"]').click(function(){
+        id = $(this).attr('id')
+        alert(id);
+        $.get(window.location.host + "/getreport" + "?id=" + id, function(data,status){
+            alert(data);
+//update map
+        }
+    });
+
 });
 

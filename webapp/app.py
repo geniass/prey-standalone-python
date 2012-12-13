@@ -198,7 +198,6 @@ def device(device_id):
 @app.route('/devices/<device_id>/reports.xml', methods=['GET', 'POST'])
 def reports_xml(device_id):
     if request.method == 'GET':
-        print_stderr("Get params (devices/[id].xml):" + str(request.args.items()))
         reports = reports_collection.find({'device_id': device_id})
         print_stderr(reports[0])
         return render_template('reports_basic.html', reports=reports)
@@ -234,6 +233,16 @@ def reports_xml(device_id):
     #elif request.method == 'PUT':
     #    print_stderr("Put Data (devices/[id].xml):" + str(request.data))
     return "<data></data>"
+
+
+@app.route('/getreport')
+def getreport():
+    if request.method == 'GET':
+        params = request.args.items()
+        if params:
+            print_stderr("Get params (devices/[id].xml):" + str(request.args.items()))
+            if 'id' in params:
+                return reports_collection.find_one(params['id'])
 
 
 #Needs some authentication

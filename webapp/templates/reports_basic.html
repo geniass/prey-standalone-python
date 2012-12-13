@@ -16,7 +16,7 @@
                 <ul class="nav nav-list">
                     {% if reports.count != 0 %}
                     {% for report in reports %}
-                    <li class="nav-header active"><a href="#{{ report['_id'] }}">{{ report['utc_time'] }}</a></li>
+                    <li class="nav-header active"><a href="#" id="{{ report['_id'] }}">{{ report['utc_time'] }}</a></li>
                     {% endfor %}
                     {% else %}
                     <li class="nav-header">No Reports</li>

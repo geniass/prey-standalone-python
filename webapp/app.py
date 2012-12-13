@@ -7,6 +7,7 @@ import elementtree.ElementTree as ET
 from elementtree.ElementTree import XML, fromstring, tostring
 import json
 import pymongo
+from bson.objectid import ObjectId
 import bcrypt
 import uuid
 import string
@@ -242,7 +243,7 @@ def getreport():
         print_stderr("Get params (getreport):" + str(request.args.items()))
         if 'id' in params:
             print_stderr(params['id'])
-            return reports_collection.find_one({"_id": params['id']})
+            return reports_collection.find_one({"_id": ObjectId(params['id'])})
 
 
 #Needs some authentication

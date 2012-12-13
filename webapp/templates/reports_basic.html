@@ -14,26 +14,13 @@
         <div class="span3">
             <div class="well sidebar-nav">
                 <ul class="nav nav-list">
-                    <!--<li class="nav-header">Sidebar</li>
-                    <li class="active"><a href="#">Link</a></li>
-                    <li><a href="#">Link</a></li>
-                    <li><a href="#">Link</a></li>
-                    <li><a href="#">Link</a></li>
-                    <li class="nav-header">Sidebar</li>
-                    <li><a href="#">Link</a></li>
-                    <li><a href="#">Link</a></li>
-                    <li><a href="#">Link</a></li>
-                    <li><a href="#">Link</a></li>
-                    <li><a href="#">Link</a></li>
-                    <li><a href="#">Link</a></li>
-                    <li class="nav-header">Sidebar</li>
-                    <li><a href="#">Link</a></li>
-                    <li><a href="#">Link</a></li>
-                    <li><a href="#">Link</a></li>-->
-
+                    {% if reports.count != 0 %}
                     {% for report in reports %}
-                    <li class="nav-header active"><a href="{{ report['utc_time'] }}">{{ report['utc_time'] }}</a></li>
+                    <li class="nav-header active"><a href="#{{ report['_id'] }}">{{ report['utc_time'] }}</a></li>
                     {% endfor %}
+                    {% else %}
+                    <li class="nav-header">No Reports</li>
+                    {% endif %}
                 </ul>
             </div><!--/.well -->
         </div><!--/span-->

@@ -32,11 +32,11 @@ jQuery(function($) {
     $.get("../.." + "/getreport" + "?id=" + id, function(data,status){
         alert(data);
         //update map
-        /*marker = new google.maps.Marker({
+        marker = new google.maps.Marker({
             position: new google.maps.LatLng(data['lat'], data['lng']),
                title:"Last Known Position"
-        });*/
-        //marker.setMap(map);
+        });
+        marker.setMap(map);
         map.setCenter(new google.maps.LatLng(data['lat'], data['lng']))
 google.maps.event.trigger(map, 'resize');
 

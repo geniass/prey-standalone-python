@@ -37,7 +37,7 @@ jQuery(function($) {
             position: new google.maps.LatLng(data['lat'], data['lng']),
                title:"Last Known Position"
         });
-        marker.setMap(map);
+        //marker.setMap(map);
         map.setCenter(new google.maps.LatLng(data['lat'], data['lng']))
     });
     });

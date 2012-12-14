@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
 
-from flask import Flask, render_template, redirect, url_for, g, request
+from flask import Flask, render_template, redirect, url_for, g, request, Response
 import sys
 import requests
 import elementtree.ElementTree as ET
@@ -246,7 +246,7 @@ def getreport():
             report['_id'] = str(report['_id'])
             report['utc_time'] = str(report['utc_time'])
             print_stderr(report)
-            return json.dumps(report)
+            return Response(json.dumps(report), mimetype='text/json')
 
 
 #Needs some authentication

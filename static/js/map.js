@@ -24,6 +24,7 @@ jQuery(function($) {
         offsetTop = 60; // Calculate the top offset
 
     $('#map_canvas').css('height', (h - offsetTop));
+    google.maps.event.trigger(map, 'resize');
     }).resize();
 
     $('a[href="#"]').click(function(){

@@ -31,6 +31,7 @@ jQuery(function($) {
         $.get("../.." + "/getreport" + "?id=" + id, function(data,status){
             alert(data);
             //update map
+            map.setCenter(new google.maps.LatLng(data['lat'], data['lng']))
         });
     });
 

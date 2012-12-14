@@ -14,7 +14,7 @@ jQuery(function($) {
         $('a[href="#profile"]').on('shown', function(e) {
             google.maps.event.trigger(map, 'resize');
         });
-        $("#map_canvas").css("width", 400).css("height", 400);
+        //$("#map_canvas").css("width", 400).css("height", 400);
     });
 
     $(window).resize(function () {
@@ -22,8 +22,6 @@ jQuery(function($) {
         offsetTop = 60; // Calculate the top offset
 
     //$('#map_canvas').css('height', (h - offsetTop));
-    $('#map_canvas').width(window.width());
-    $('#map_canvas').height(window.height());
     }).resize();
 
     $('a[href="#"]').click(function(){
@@ -33,15 +31,12 @@ jQuery(function($) {
         alert(data);
         //update map
         marker = new google.maps.Marker({
-            position: new google.maps.LatLng(data['lat'], data['lng']),
+            position: new google.maps.LatLng(data['latitude'], data['longitude']),
                title:"Last Known Position"
         });
         marker.setMap(map);
-        map.setCenter(new google.maps.LatLng(data['lat'], data['lng']));
-$('#map_canvas').width(window.width());
-    $('#map_canvas').height(window.height());
+        map.setCenter(new google.maps.LatLng(data['latitude'], data['longitude']));
 
-google.maps.event.trigger(map, 'resize');
 
     });
     });

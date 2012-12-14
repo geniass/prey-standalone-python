@@ -1,5 +1,3 @@
-map;
-marker;
 
 jQuery(function($) {
     $(document).ready(function() {

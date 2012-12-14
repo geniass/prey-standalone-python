@@ -243,6 +243,7 @@ def getreport():
         print_stderr("Get params (getreport):" + str(request.args.items()))
         if 'id' in params:
             report = reports_collection.find_one({"_id": ObjectId(params['id'])})
+            report['_id'] = str(report['_id'])
             print_stderr(report)
             return json.dumps(report)
 

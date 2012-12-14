@@ -28,7 +28,7 @@ jQuery(function($) {
         id = $(this).attr('id')
         alert(id);
     $.get("../.." + "/getreport" + "?id=" + id, function(data,status){
-        alert(data);
+        alert(data['latitude']);
         //update map
         marker = new google.maps.Marker({
             position: new google.maps.LatLng(data['latitude'], data['longitude']),

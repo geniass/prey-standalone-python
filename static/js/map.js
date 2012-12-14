@@ -14,7 +14,7 @@ jQuery(function($) {
         $('a[href="#profile"]').on('shown', function(e) {
             google.maps.event.trigger(map, 'resize');
         });
-        //$("#map_canvas").css("width", 400).css("height", 400);
+        $("#map_canvas").css("width", 400).css("height", 400);
     });
 
     $(window).resize(function () {

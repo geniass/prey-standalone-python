@@ -24,7 +24,6 @@ jQuery(function($) {
         offsetTop = 60; // Calculate the top offset
 
     $('#map_canvas').css('height', (h - offsetTop));
-    google.maps.event.trigger(map, 'resize');
     }).resize();
 
     $('a[href="#"]').click(function(){
@@ -39,6 +38,8 @@ jQuery(function($) {
         });*/
         //marker.setMap(map);
         map.setCenter(new google.maps.LatLng(data['lat'], data['lng']))
+google.maps.event.trigger(map, 'resize');
+
     });
     });
 

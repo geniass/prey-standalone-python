@@ -21,7 +21,9 @@ jQuery(function($) {
         var h = $(window).height(),
         offsetTop = 60; // Calculate the top offset
 
-    $('#map_canvas').css('height', (h - offsetTop));
+    //$('#map_canvas').css('height', (h - offsetTop));
+    $('#map_canvas').width(window.width());
+    $('#map_canvas').height(window.height());
     }).resize();
 
     $('a[href="#"]').click(function(){
@@ -35,7 +37,10 @@ jQuery(function($) {
                title:"Last Known Position"
         });
         marker.setMap(map);
-        map.setCenter(new google.maps.LatLng(data['lat'], data['lng']))
+        map.setCenter(new google.maps.LatLng(data['lat'], data['lng']));
+$('#map_canvas').width(window.width());
+    $('#map_canvas').height(window.height());
+
 google.maps.event.trigger(map, 'resize');
 
     });

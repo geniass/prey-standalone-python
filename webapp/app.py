@@ -244,6 +244,7 @@ def getreport():
         if 'id' in params:
             report = reports_collection.find_one({"_id": ObjectId(params['id'])})
             report['_id'] = str(report['_id'])
+            report['utc_time'] = str(report['utc_time'])
             print_stderr(report)
             return json.dumps(report)
 

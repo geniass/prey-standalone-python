@@ -29,9 +29,9 @@ jQuery(function($) {
 
     $('a[href="#"]').click(function(){
         id = $(this).attr('id')
-        alert(id);
+        //alert(id);
     $.get("../.." + "/getreport" + "?id=" + id, function(data,status){
-        alert(data['latitude']);
+        //alert(data['latitude']);
         report_data = data;
         //update map
         marker = new google.maps.Marker({
@@ -41,7 +41,7 @@ jQuery(function($) {
         marker.setMap(map);
         map.setCenter(new google.maps.LatLng(data['latitude'], data['longitude']));
 
-
+        codeLatLng();
     });
     });
 

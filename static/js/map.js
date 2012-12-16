@@ -46,7 +46,7 @@ jQuery(function($) {
     });
 
     function codeLatLng() {
-        var latlng = new google.maps.LatLng(data['latitude'], data['longitude']);
+        var latlng = new google.maps.LatLng(report_data['latitude'], report_data['longitude']);
         geocoder.geocode({'latLng': latlng}, function(results, status) {
             if (status == google.maps.GeocoderStatus.OK) {
                 if (results[1]) {

@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
 
-from flask import Flask, render_template, redirect, url_for, g, request, Response
+from flask import Flask, render_template, redirect, url_for, request, Response
 import sys
 import requests
 import elementtree.ElementTree as ET
@@ -15,18 +15,23 @@ import random
 import datetime
 
 app = Flask(__name__)
-#regId = "APA91bGOKc5MucM4tXVENh7bbUSCveszrctTIfhjFFGNz08NSWCpBhkL2e8LfRU3MhNRuQNdFcNYMiDnXfLPmgBXAgG9NYbDB9IYaFrau0tCvkAbSql6VrSLeaTYWze_wiVMHJUk1JRH"
 
 GCM_URL = "https://android.googleapis.com/gcm/send"
 API_KEY = "AIzaSyCGDI006zQ4V0I-GKYVakVkEBD8Gp0JfRI"
 
-with open('/home/dotcloud/environment.json') as f:
+f = open('/home/dotcloud/environment.json')
+if f:       # if the file exists
     env = json.load(f)
 
-#connection = pymongo.MongoClient(host=env['DOTCLOUD_PREYDB_MONGODB_HOST'], port=int(env['DOTCLOUD_PREYDB_MONGODB_PORT']))
-connection = pymongo.MongoClient(env['PREYDB_URL'])
+    #connection = pymongo.MongoClient(host=env['DOTCLOUD_PREYDB_MONGODB_HOST'], port=int(env['DOTCLOUD_PREYDB_MONGODB_PORT']))
+    connection = pymongo.MongoClient(env['PREYDB_URL'])
+    #db.authenticate(env['PREYDB_USER'], env['PREYDB_PWD'])
+
+else:
+    # connect to localhost mongodb
+    connection = pymongo.MongoClient()
+
 db = connection.preydb
-#db.authenticate(env['PREYDB_USER'], env['PREYDB_PWD'])
 users_collection = db.users
 devices_collection = db.devices
 reports_collection = db.reports
@@ -58,11 +63,13 @@ def users():
 
         if all(x is not None for x in user_dict):
                 #VERIFY PWD ETC
-                user_id = users_collection.find_one({"email": user_dict['email']})  # , fields=["_id"])
+                user_id = users_collection.find_one(
+                        {"email": user_dict['email']})  # , fields=["_id"])
                 print_stderr("User ID: " + str(user_id))
                 if user_id is None:
                     #USER DOES NOT EXIST
-                    user_dict['pwd'] = bcrypt.hashpw(user_dict['pwd'], bcrypt.gensalt())
+                    user_dict['pwd'] = bcrypt.hashpw(user_dict['pwd'],
+                                                    bcrypt.gensalt())
                     user_dict['api_key'] = uuid.uuid4().hex
                     users_collection.insert(user_dict)
 
@@ -84,14 +91,13 @@ account. Oh well"""
 @app.route('/devices.xml', methods=['POST'])
 def devices():
     if request.method == 'POST':
-        
         if not request.data:
             data = request.form.keys()[0]
         else:
             data = request.data
 
         print_stderr("POST data (devices.xml): " + str(data))
- 
+
         keyvalue = prey_params_dict(data)
         device = {}
         device_id = None
@@ -152,14 +158,17 @@ def device(device_id):
         auto_update.text = "false"
 
         modules = ET.SubElement(root, "modules")
+
         system_module = ET.SubElement(modules, "module",
                 attrib={"type": "action", "active": "true",
                     "name": "system", "version": "1.5"})
+
         network_module = ET.SubElement(modules, "module",
-                attrib={"type":"report", "active": "true",
+                attrib={"type": "report", "active": "true",
                     "name": "network", "version": "1.5"})
+
         geo_module = ET.SubElement(modules, "module",
-                attrib={"type":"report", "active": "true",
+                attrib={"type": "report", "active": "true",
                     "name": "geo", "version": "1.5"})
         #calls_module = ET.SubElement(modules, "module",
         #        attrib={"type":"report", "active": "true",
@@ -261,9 +270,10 @@ def missing(device_id):
         print_stderr("Reg ID: " + str(regId))
         headers = {"content-type": "application/json",
                         "Authorization": "key=" + str(API_KEY)}
-        payload = {"registration_ids": [regId], 
-                "data": {"data": {"event":"message",
-                        "data":{"type":"text","body":"run_once","key":device_id}}}}
+        payload = {"registration_ids": [regId],
+                "data": {"data": {"event": "message",
+                        "data": {"type": "text", "body": "run_once",
+                            "key": device_id}}}}
 
         r = requests.post(GCM_URL, json.dumps(payload), headers=headers)
 
@@ -299,7 +309,6 @@ def random_string(length):
         # There are less digits than letters so add digits twice
         return ''.join(random.choice(string.ascii_lowercase + string.digits + string.digits)
                 for x in range(length))
-
 
 
 if __name__ == '__main__':

@@ -4,12 +4,15 @@ jQuery(function($) {
         var latlng = new google.maps.LatLng(-34.397, 150.644);
         var myOptions = {
             zoom: 8,
-        center: latlng,
-        mapTypeId: google.maps.MapTypeId.ROADMAP
+    center: latlng,
+    mapTypeId: google.maps.MapTypeId.ROADMAP
         };
         map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
         console.dir(map);
         google.maps.event.trigger(map, 'resize');
+
+        geocoder = new google.maps.Geocoder();
+        infowindow = new google.maps.InfoWindow();
 
         $('a[href="#profile"]').on('shown', function(e) {
             google.maps.event.trigger(map, 'resize');
@@ -29,6 +32,7 @@ jQuery(function($) {
         alert(id);
     $.get("../.." + "/getreport" + "?id=" + id, function(data,status){
         alert(data['latitude']);
+        report_data = data;
         //update map
         marker = new google.maps.Marker({
             position: new google.maps.LatLng(data['latitude'], data['longitude']),
@@ -40,6 +44,25 @@ jQuery(function($) {
 
     });
     });
+
+    function codeLatLng() {
+        var latlng = new google.maps.LatLng(data['latitude'], data['longitude']);
+        geocoder.geocode({'latLng': latlng}, function(results, status) {
+            if (status == google.maps.GeocoderStatus.OK) {
+                if (results[1]) {
+                    map.setZoom(11);
+                    marker = new google.maps.Marker({
+                        position: latlng,
+                           map: map
+                    });
+                    infowindow.setContent(results[1].formatted_address);
+                    infowindow.open(map, marker);
+                }
+            } else {
+                alert("Geocoder failed due to: " + status);
+            }
+        });
+    }
 
 });
 

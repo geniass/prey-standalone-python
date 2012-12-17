@@ -8,4 +8,4 @@ class User(UserMixin):
             self.active = active
 
     def get_id(self):
-        return str(_id).decode('utf-8')
+        return str(self._id).decode('utf-8')

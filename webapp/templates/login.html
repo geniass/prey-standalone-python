@@ -1,0 +1,32 @@
+{% extends "bootstrap.html" %}
+{% block body %}
+
+
+<form class="form-horizontal"action="login" method="post" accept-charset="UTF-8">
+    <fieldset>
+    <legend>Login</legend>
+    <!--<input id="email" style="margin-bottom: 15px;" type="text" name="email" size="30" value="Email Address" />
+    <input id="password" style="margin-bottom: 15px;" type="password" name="password" size="30" value="Password" />
+    <input id="remember_me" style="float: left; margin-right: 10px;" type="checkbox" name="remember_me" value="1" />-->
+    {{ login_form.hidden_tag() }}
+    <div class="control-group">
+        <label class="control-label">Email</label>
+        <div class="controls"
+            {{ login_form.email(style="margin-bottom: 15px;", size=80, rel="popover", data-content="Enter your valid email address", data-original-title="Email Address") }}
+        </div>
+    </div>
+<div class="control-group">
+        <label class="control-label">Password</label>
+        <div class="controls"
+            {{ login_form.password(style="margin-bottom: 15px;", size=80, rel="popover", data-content="Enter your password", data-original-title="Password") }}
+        </div>
+    </div>
+    {{ login_form.remember_me(style="float: left; margin-right: 10px;") }}
+    <label class="string optional" for="remember_me"> Remember me</label>
+
+    <input class="btn btn-primary" style="clear: left; width: 100%; height: 32px; font-size: 13px;" type="submit" name="commit" value="Sign In" />
+</legend>
+</fieldset>
+</form>
+{% endblock body %}
+

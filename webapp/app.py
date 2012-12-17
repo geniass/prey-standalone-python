@@ -2,6 +2,7 @@
 
 from flask import Flask, render_template, redirect, url_for, request, Response
 from flask.ext.login import *
+from User import User
 import sys
 import requests
 import elementtree.ElementTree as ET
@@ -42,10 +43,11 @@ reports_collection = db.reports
 login_manager = LoginManager()
 login_manager.setup_app(app)
 
+
 @login_manager.user_loader
-def load_user(user_id):
-    #What is this supposed to do?
-    return None  # for now
+def load_user(email):
+    user = users_collection.find_one({"email": email})
+    return User(user['email'], user['email'], True)
 
 
 @app.route('/')

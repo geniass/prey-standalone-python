@@ -32,13 +32,13 @@ try:
         connection = pymongo.MongoClient(env['PREYDB_URL'])
         #db.authenticate(env['PREYDB_USER'], env['PREYDB_PWD'])
 
-        app.secret_key = env['SECRET_KEY']
+        app.secret_key = str(env['SECRET_KEY'])
 
 except IOError:
     # connect to localhost mongodb
     connection = pymongo.MongoClient()
     # this key is only used locally so it doesn't matter if you know it
-    app.secret_key = """D"vl<K,E[;#^.!Re/Z|hnLG)$Ngkyc,oN\.%Z;J(uKSTV)ztVAjg*i]O$9|{@;;"""
+    app.secret_key = str("""D"vl<K,E[;#^.!Re/Z|hnLG)$Ngkyc,oN\.%Z;J(uKSTV)ztVAjg*i]O$9|{@;;""")
 
 db = connection.preydb
 users_collection = db.users

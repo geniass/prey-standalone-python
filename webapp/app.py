@@ -47,7 +47,7 @@ reports_collection = db.reports
 
 login_manager = LoginManager()
 login_manager.setup_app(app)
-login_form = LoginForm()
+#login_form = LoginForm()
 
 
 @login_manager.user_loader
@@ -58,12 +58,14 @@ def load_user(email):
 
 @app.route('/')
 def homepage():
+    login_form = LoginForm()
     devices = devices_collection.find()
     return render_template('index.html', devices=devices, login_form=login_form)
 
 
 @app.route('/login')
 def login():
+    login_form = LoginForm()
     if login_form.validate_on_submit():
         return redirect('/')
     return render_template('login.html', login_form=login_form)

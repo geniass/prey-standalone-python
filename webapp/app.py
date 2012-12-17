@@ -3,6 +3,7 @@
 from flask import Flask, render_template, redirect, url_for, request, Response
 from flask.ext.login import *
 from User import User
+from Forms import LoginForm
 import sys
 import requests
 import elementtree.ElementTree as ET
@@ -21,8 +22,8 @@ app = Flask(__name__)
 GCM_URL = "https://android.googleapis.com/gcm/send"
 API_KEY = "AIzaSyCGDI006zQ4V0I-GKYVakVkEBD8Gp0JfRI"
 
-#f = open('/home/dotcloud/environment.json')
-#if f:       # if the file exists
+# this will load environment variables from dotcloud. If it is running on
+# localhost, it will do whatever is in the 'except' part
 try:
     with open('/home/dotcloud/environment.json') as f:
         env = json.load(f)
@@ -36,6 +37,7 @@ try:
 except IOError:
     # connect to localhost mongodb
     connection = pymongo.MongoClient()
+    # this key is only used locally so it doesn't matter if you know it
     app.secret_key = """D"vl<K,E[;#^.!Re/Z|hnLG)$Ngkyc,oN\.%Z;J(uKSTV)ztVAjg*i]O$9|{@;;"""
 
 db = connection.preydb
@@ -45,6 +47,7 @@ reports_collection = db.reports
 
 login_manager = LoginManager()
 login_manager.setup_app(app)
+login_form = LoginForm()
 
 
 @login_manager.user_loader
@@ -56,7 +59,14 @@ def load_user(email):
 @app.route('/')
 def homepage():
     devices = devices_collection.find()
-    return render_template('index.html', devices=devices)
+    return render_template('index.html', devices=devices, login_form=login_form)
+
+
+@app.route('/login')
+def login():
+    if login_form.validate_on_submit():
+        return redirect('/')
+    return render_template('login.html', login_form=login_form)
 
 
 #Don't use yet

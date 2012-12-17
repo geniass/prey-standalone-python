@@ -32,12 +32,14 @@ try:
         connection = pymongo.MongoClient(env['PREYDB_URL'])
         #db.authenticate(env['PREYDB_USER'], env['PREYDB_PWD'])
 
+        # have to convert from unicode to string otherwise shit happens
         app.secret_key = str(env['SECRET_KEY'])
 
 except IOError:
     # connect to localhost mongodb
     connection = pymongo.MongoClient()
     # this key is only used locally so it doesn't matter if you know it
+    # have to convert from unicode to string otherwise shit happens
     app.secret_key = str("""D"vl<K,E[;#^.!Re/Z|hnLG)$Ngkyc,oN\.%Z;J(uKSTV)ztVAjg*i]O$9|{@;;""")
 
 db = connection.preydb
@@ -47,7 +49,7 @@ reports_collection = db.reports
 
 login_manager = LoginManager()
 login_manager.setup_app(app)
-#login_form = LoginForm()
+g.login_form = LoginForm()
 
 
 @login_manager.user_loader
@@ -58,17 +60,17 @@ def load_user(email):
 
 @app.route('/')
 def homepage():
-    login_form = LoginForm()
+    #login_form = LoginForm()
     devices = devices_collection.find()
-    return render_template('index.html', devices=devices, login_form=login_form)
+    return render_template('index.html', devices=devices, login_form=g.login_form)
 
 
 @app.route('/login')
 def login():
-    login_form = LoginForm()
+    #login_form = LoginForm()
     if login_form.validate_on_submit():
         return redirect('/')
-    return render_template('login.html', login_form=login_form)
+    return render_template('login.html', login_form=g.login_form)
 
 
 #Don't use yet

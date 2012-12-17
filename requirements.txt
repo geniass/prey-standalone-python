@@ -7,3 +7,4 @@ requests
 elementtree
 pymongo
 py-bcrypt
+flask-login

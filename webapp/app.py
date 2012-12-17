@@ -1,10 +1,11 @@
 # -*- coding: utf8 -*-
 
 from flask import Flask, render_template, redirect, url_for, request, Response
+from flask.ext.login import *
 import sys
 import requests
 import elementtree.ElementTree as ET
-from elementtree.ElementTree import XML, fromstring, tostring
+from elementtree.ElementTree import tostring
 import json
 import pymongo
 from bson.objectid import ObjectId
@@ -19,15 +20,17 @@ app = Flask(__name__)
 GCM_URL = "https://android.googleapis.com/gcm/send"
 API_KEY = "AIzaSyCGDI006zQ4V0I-GKYVakVkEBD8Gp0JfRI"
 
-f = open('/home/dotcloud/environment.json')
-if f:       # if the file exists
-    env = json.load(f)
+#f = open('/home/dotcloud/environment.json')
+#if f:       # if the file exists
+try:
+    with open('/home/dotcloud/environment.json') as f:
+        env = json.load(f)
 
-    #connection = pymongo.MongoClient(host=env['DOTCLOUD_PREYDB_MONGODB_HOST'], port=int(env['DOTCLOUD_PREYDB_MONGODB_PORT']))
-    connection = pymongo.MongoClient(env['PREYDB_URL'])
-    #db.authenticate(env['PREYDB_USER'], env['PREYDB_PWD'])
+        #connection = pymongo.MongoClient(host=env['DOTCLOUD_PREYDB_MONGODB_HOST'], port=int(env['DOTCLOUD_PREYDB_MONGODB_PORT']))
+        connection = pymongo.MongoClient(env['PREYDB_URL'])
+        #db.authenticate(env['PREYDB_USER'], env['PREYDB_PWD'])
 
-else:
+except IOError:
     # connect to localhost mongodb
     connection = pymongo.MongoClient()
 
@@ -35,6 +38,14 @@ db = connection.preydb
 users_collection = db.users
 devices_collection = db.devices
 reports_collection = db.reports
+
+login_manager = LoginManager()
+login_manager.setup_app(app)
+
+@login_manager.user_loader
+def load_user(user_id):
+    #What is this supposed to do?
+    return None  # for now
 
 
 @app.route('/')

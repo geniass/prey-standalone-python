@@ -4,7 +4,7 @@
 <div class="container">
     <div class="row">
         <div class="span8">
-            <form class="form-horizontal"action="login" method="post" accept-charset="UTF-8">
+            <form class="form-horizontal" action="login" method="post" accept-charset="UTF-8">
                 <fieldset>
                     <legend>Login</legend>
                     <!--<input id="email" style="margin-bottom: 15px;" type="text" name="email" size="30" value="Email Address" />
@@ -27,6 +27,7 @@
                         <div class="controls">
                             {{ login_form.remember_me() }}
                             <label class="control-label">Remember Me</label>
+                            {{ login_form.remember_me }}
                         </div>
                     </div>
 

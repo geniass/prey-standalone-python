@@ -16,6 +16,7 @@ import uuid
 import string
 import random
 import datetime
+from urllib2 import quote, unquote
 
 app = Flask(__name__)
 
@@ -116,11 +117,11 @@ def users():
         result = "<errors><error>%s</error><errors>"
 
         if "user%5Bname%5D" in keyvalue:
-            user_dict['name'] = keyvalue["user%5Bname%5D"]
+            user_dict['name'] = unquote(keyvalue["user%5Bname%5D"])
         if "user%5Bemail%5D" in keyvalue:
-            user_dict['email'] = keyvalue["user%5Bemail%5D"]
+            user_dict['email'] = unquote(keyvalue["user%5Bemail%5D"])
         if "user%5Bpassword%5D" in keyvalue:
-            user_dict['pwd'] = keyvalue["user%5Bpassword%5D"]
+            user_dict['pwd'] = unquote(keyvalue["user%5Bpassword%5D"])
 
         if all(x is not None for x in user_dict):
                 #VERIFY PWD ETC

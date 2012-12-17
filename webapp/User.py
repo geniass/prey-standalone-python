@@ -7,5 +7,5 @@ class User(UserMixin):
             self._id = _id
             self.active = active
 
-    def get_id():
+    def get_id(self):
         return str(_id).decode('utf-8')

@@ -11,13 +11,13 @@
     {{ login_form.hidden_tag() }}
     <div class="control-group">
         <label class="control-label">Email</label>
-        <div class="controls"
+        <div class="controls">
             {{ login_form.email(style="margin-bottom: 15px;", size=80, rel="popover", data-content="Enter your valid email address", data-original-title="Email Address") }}
         </div>
     </div>
 <div class="control-group">
         <label class="control-label">Password</label>
-        <div class="controls"
+        <div class="controls">
             {{ login_form.password(style="margin-bottom: 15px;", size=80, rel="popover", data-content="Enter your password", data-original-title="Password") }}
         </div>
     </div>
@@ -25,7 +25,6 @@
     <label class="string optional" for="remember_me"> Remember me</label>
 
     <input class="btn btn-primary" style="clear: left; width: 100%; height: 32px; font-size: 13px;" type="submit" name="commit" value="Sign In" />
-</legend>
 </fieldset>
 </form>
 {% endblock body %}

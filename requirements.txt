@@ -8,3 +8,4 @@ elementtree
 pymongo
 py-bcrypt
 flask-login
+flask-wtf

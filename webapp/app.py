@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
 
-from flask import Flask, render_template, redirect, url_for, request, Response, flash
+from flask import Flask, render_template, redirect, url_for, request, Response, flash, g
 from flask.ext.login import *
 from User import User
 from Forms import LoginForm

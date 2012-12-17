@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
 
-from flask import Flask, render_template, redirect, url_for, request, Response
+from flask import Flask, render_template, redirect, url_for, request, Response, flash
 from flask.ext.login import *
 from User import User
 from Forms import LoginForm
@@ -67,6 +67,7 @@ def homepage():
 def login():
     login_form = LoginForm()
     if login_form.validate_on_submit():
+        flash("Login: " + login_form.email.data + "\n" + login_form.password.data)
         return redirect('/')
     return render_template('login.html', login_form=login_form)
 

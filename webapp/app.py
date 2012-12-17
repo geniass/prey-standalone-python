@@ -49,6 +49,7 @@ reports_collection = db.reports
 
 login_manager = LoginManager()
 login_manager.setup_app(app)
+login_manager.login_view = 'login'
 
 
 @login_manager.user_loader
@@ -57,19 +58,50 @@ def load_user(email):
     return User(user['email'], user['email'], True)
 
 
+@app.before_request
+def before_request():
+    g.user = current_user
+
+
 @app.route('/')
 def homepage():
     devices = devices_collection.find()
     return render_template('index.html', devices=devices)
 
 
+@app.route('/reports')
+@login_required
+def reports_page():
+    devices = devices_collection.find()
+    return render_template('reports-devices.html', devices=devices)
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    if g.user is not None and g.user.is_authenticated():
+        return redirect('/')
     login_form = LoginForm()
     if login_form.validate_on_submit():
-        flash("Login: " + login_form.email.data + "\n" + login_form.password.data)
-        return redirect('/')
+        user_dict = users_collection.find_one({"email": login_form.email.data})
+        if not user_dict:
+            flash("That email has not been registered")
+            return redirect('/signup')
+        pwd_hash = bcrypt.hashpw(login_form.password.data, user_dict['salt'])
+        if pwd_hash == user_dict['pwd']:
+            user = User(user_dict['email'], user_dict['_id'])
+            login_user(user, remember=login_form.remember_me.data)
+            flash("Logged in succesfully")
+            return redirect('/')
+        else:
+            flash("The password you entered is incorrect")
+            return redirect('/login')
     return render_template('login.html', login_form=login_form)
+
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect('/')
 
 
 #Don't use yet
@@ -97,8 +129,9 @@ def users():
                 print_stderr("User ID: " + str(user_id))
                 if user_id is None:
                     #USER DOES NOT EXIST
+                    user_dict['salt'] = bcrypt.gensalt()
                     user_dict['pwd'] = bcrypt.hashpw(user_dict['pwd'],
-                                                    bcrypt.gensalt())
+                                                    user_dict['salt'])
                     user_dict['api_key'] = uuid.uuid4().hex
                     users_collection.insert(user_dict)
 
@@ -237,9 +270,15 @@ def device(device_id):
 @app.route('/devices/<device_id>/reports.xml', methods=['GET', 'POST'])
 def reports_xml(device_id):
     if request.method == 'GET':
-        reports = reports_collection.find({'device_id': device_id})
-        print_stderr(reports[0])
-        return render_template('reports_basic.html', reports=reports)
+        device = devices_collection.find_one({"device_id": device_id})
+        user = users_collection.find_one(g.user._id)
+        if device['api_key'] == user['api_key']:
+            reports = reports_collection.find({'device_id': device_id})
+            print_stderr(reports[0])
+            return render_template('reports_basic.html', reports=reports)
+        else:
+            flash("Editing URL's? That's not your device!")
+            return redirect('/')
 
     elif request.method == 'POST':
         print_stderr("reports.xml")

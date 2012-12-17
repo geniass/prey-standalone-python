@@ -2,11 +2,10 @@ from flask.ext.login import *
 
 
 class User(UserMixin):
-    def __init__(self, name, id, active=True):
-            self.name = name
-            self.id = id
+    def __init__(self, email, _id, active=True):
+            self.email = email
+            self._id = _id
             self.active = active
 
-
-
-
+    def get_id():
+        return str(_id).decode('utf-8')

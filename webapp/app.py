@@ -54,9 +54,10 @@ login_manager.login_view = 'login'
 
 
 @login_manager.user_loader
-def load_user(email):
-    user = users_collection.find_one({"email": email})
-    return User(user['email'], user['email'], True)
+def load_user(userid):
+    _id = ObjectId(userid.encode('utf-8'))
+    user = users_collection.find_one(_id)
+    return User(user['email'], _id, True)
 
 
 @app.before_request

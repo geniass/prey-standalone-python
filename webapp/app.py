@@ -111,7 +111,7 @@ def logout():
 def users():
     if request.method == 'POST':
         print_stderr("Users.xml Request.data: " + str(request.data))
-        print_stderr("Users.xml Other thing: " + str(request.form.keys()[0]))
+        print_stderr("Users.xml Other thing: " + str(request.form.keys()))
 
         keyvalue = prey_params_dict(request.data)
         print_stderr("POST Data (users.xml): " + str(keyvalue))

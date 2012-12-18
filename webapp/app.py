@@ -18,6 +18,7 @@ import random
 import datetime
 from urllib2 import quote, unquote
 
+
 app = Flask(__name__)
 
 GCM_URL = "https://android.googleapis.com/gcm/send"
@@ -53,6 +54,10 @@ login_manager.setup_app(app)
 login_manager.login_view = 'login'
 
 
+"""FRONT END
+THIS IS THE CODE FOR THE WEBSITE"""
+
+
 @login_manager.user_loader
 def load_user(userid):
     _id = ObjectId(userid.encode('utf-8'))
@@ -81,6 +86,18 @@ def reports_page():
     return render_template('reports-devices.html', devices=devices)
 
 
+@app.route('/getreport')
+def getreport():
+    params = request.args
+    print_stderr("Get params (getreport):" + str(request.args.items()))
+    if 'id' in params:
+        report = reports_collection.find_one({"_id": ObjectId(params['id'])})
+        report['_id'] = str(report['_id'])
+        report['utc_time'] = str(report['utc_time'])
+        print_stderr(report)
+        return Response(json.dumps(report), mimetype='text/json')
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if g.user is not None and g.user.is_authenticated():
@@ -104,12 +121,16 @@ def login():
 
 
 @app.route('/logout')
+@login_required
 def logout():
     logout_user()
     return redirect('/')
 
 
-#Don't use yet
+"""BACKEND
+THIS CODE IS FOR INTERFACING WITH THE ANDROID CLIENT"""
+
+
 @app.route('/users.xml', methods=['POST'])
 def users():
     if request.method == 'POST':
@@ -275,6 +296,7 @@ def device(device_id):
     return "<data></data>"
 
 
+# I might restructure the reports and missing URL stuff at some point
 @app.route('/devices/<device_id>/reports.xml', methods=['GET', 'POST'])
 def reports_xml(device_id):
     if request.method == 'GET':
@@ -321,22 +343,12 @@ def reports_xml(device_id):
     return "<data></data>"
 
 
-@app.route('/getreport')
-def getreport():
-    if request.method == 'GET':
-        params = request.args
-        print_stderr("Get params (getreport):" + str(request.args.items()))
-        if 'id' in params:
-            report = reports_collection.find_one({"_id": ObjectId(params['id'])})
-            report['_id'] = str(report['_id'])
-            report['utc_time'] = str(report['utc_time'])
-            print_stderr(report)
-            return Response(json.dumps(report), mimetype='text/json')
-
-
-#Needs some authentication
+# I might restructure the reports and missing URL stuff at some point
 @app.route('/devices/<device_id>/missing')
+@login_required
 def missing(device_id):
+    """Sends a push message to the selected device through Google's
+    API"""
     device = devices_collection.find_one({"device_id": device_id})
     print_stderr(device)
 
@@ -358,6 +370,9 @@ def missing(device_id):
         flash("This device is not in the database")
         return redirect("/devices/" + str(device_id) + "/missing")
 
+
+# This doesn't do anything yet
+# It should verify passwords, change passwords etc...
 @app.route('/profile.xml', methods=['GET'])
 def profile():
     if request.method == 'GET':
@@ -379,6 +394,8 @@ def print_stderr(message):
     print >> sys.stderr, message
 
 
+# Apparently flask does parsing of POST data automatically if it is
+# transmitted in the right format and encoding
 def prey_params_dict(prey_params):
         pairs = prey_params.split("&")
         return {f[0]: f[1] for f in [x.split("=") for x in pairs]}

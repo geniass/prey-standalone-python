@@ -3,11 +3,11 @@
 <title>Prey Standalone - Select a Device</title>
 {% endblock head %}
 {% block body %}
-<div class="container">
+<div class="container-fluid">
     <ul class="nav nav-pills nav-stacked">
         {% for device in devices %}
         <li class="active"><a href="devices/{{ device['device_id'] }}/reports.xml">
-            <div class="row">
+            <div class="row-fluid">
                 <div class="span4">Device Id: {{device['device_id']}}</div>
                 <div class="span4">Model: {{device['vendor'] + " " + device['model']}}</div>
                 <div class="span4">OS: {{device['os'] + " " + device['os_version']}}</div>

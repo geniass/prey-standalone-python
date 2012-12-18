@@ -123,7 +123,7 @@ def login():
             user = User(user_dict['email'], user_dict['_id'])
             login_user(user, remember=login_form.remember_me.data)
             flash("Logged in succesfully", "success")
-            return redirect('/')
+            return redirect(request.args.get("next") or url_for("index"))
         else:
             flash("The password you entered is incorrect", "error")
             return redirect('/login')
@@ -314,8 +314,8 @@ def reports_xml(device_id):
         user = users_collection.find_one(g.user._id)
         if device['api_key'] == user['api_key']:
             reports = reports_collection.find({'device_id': device_id})
-            print_stderr(reports.count)
-            if reports.count == 0:
+            print_stderr(reports.count())
+            if reports.count() == 0:
                 flash("There are no reports for this device", "warning")
             return render_template('reports_basic.html', reports=reports)
         else:

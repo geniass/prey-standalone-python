@@ -14,7 +14,7 @@
         <div class="span3">
             <div class="well sidebar-nav">
                 <ul class="nav nav-list">
-                    {% if reports.count != 0 %}
+                    {% if reports.count() != 0 %}
                     {% for report in reports %}
                     <li class="nav-header active"><a href="#" id="{{ report['_id'] }}">{{ report['utc_time'] }}</a></li>
                     {% endfor %}

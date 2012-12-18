@@ -123,7 +123,7 @@ def login():
             user = User(user_dict['email'], user_dict['_id'])
             login_user(user, remember=login_form.remember_me.data)
             flash("Logged in succesfully", "success")
-            return redirect(request.args.get("next") or url_for("index"))
+            return redirect(urllib2.unquote(request.args.get("next")) or url_for("index"))
         else:
             flash("The password you entered is incorrect", "error")
             return redirect('/login')

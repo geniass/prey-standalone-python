@@ -57,7 +57,10 @@ login_manager.login_view = 'login'
 def load_user(userid):
     _id = ObjectId(userid.encode('utf-8'))
     user = users_collection.find_one(_id)
-    return User(user['email'], _id, True)
+    if user:
+        return User(user['email'], _id, True)
+    else:
+        return None
 
 
 @app.before_request

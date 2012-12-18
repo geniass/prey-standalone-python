@@ -37,15 +37,22 @@
     </head>
 
     <body>
-        {% with messages = get_flashed_messages() %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-        <ul>
-            {% for message in messages %}
-            <li><p class="text-error"><strong>{{ message }}</strong></p></li>
-            {% endfor %}
-        </ul>
+        {% for category, message in messages %}
+        <div class="alert {% if category is not "warning" %}alert-{{category}}{%endif%}">
+            {% if category is "error" %}
+            <strong>Error! </strong> {{message}}
+            {% elif category is "warning" %}
+            <strong>Warning! </strong> {{message}}
+            {% elif category is "success" %}
+            <strong>Success! </strong> {{message}}
+            {% endif %}
+        </div>
+        {% endfor %}
         {% endif %}
         {% endwith %}
+
         {% block body %}{% endblock body %}
     </body>
 

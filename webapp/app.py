@@ -106,16 +106,16 @@ def login():
     if login_form.validate_on_submit():
         user_dict = users_collection.find_one({"email": login_form.email.data})
         if not user_dict:
-            flash("That email has not been registered")
+            flash("That email has not been registered", "error")
             return redirect('/signup')
         pwd_hash = bcrypt.hashpw(login_form.password.data, user_dict['salt'])
         if pwd_hash == user_dict['pwd']:
             user = User(user_dict['email'], user_dict['_id'])
             login_user(user, remember=login_form.remember_me.data)
-            flash("Logged in succesfully")
+            flash("Logged in succesfully", "success")
             return redirect('/')
         else:
-            flash("The password you entered is incorrect")
+            flash("The password you entered is incorrect", "error")
             return redirect('/login')
     return render_template('login.html', login_form=login_form)
 
@@ -307,7 +307,7 @@ def reports_xml(device_id):
             print_stderr(reports[0])
             return render_template('reports_basic.html', reports=reports)
         else:
-            flash("Editing URL's? That's not your device!")
+            flash("Editing URL's? That's not your device!", "warning")
             return redirect('/')
 
     elif request.method == 'POST':
@@ -367,7 +367,7 @@ def missing(device_id):
 
         return "<div>" + r.text + "</div>"
     else:
-        flash("This device is not in the database")
+        flash("This device is not in the database", "error")
         return redirect("/devices/" + str(device_id) + "/missing")
 
 

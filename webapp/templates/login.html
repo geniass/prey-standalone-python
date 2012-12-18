@@ -11,22 +11,30 @@
                     <input id="password" style="margin-bottom: 15px;" type="password" name="password" size="30" value="Password" />
                     <input id="remember_me" style="float: left; margin-right: 10px;" type="checkbox" name="remember_me" value="1" />-->
                     {{ login_form.hidden_tag() }}
-                    <div class="control-group">
+                    <div class="control-group {% if login_form.errors.email %} error {% endif %}">
                         <label class="control-label">Email</label>
                         <div class="controls">
                             {{ login_form.email(type="email", class="input-xlarge", size=80) }}
+                            {% for error in login_form.errors.email %}
+                            <span class="help-inline">{{error}}</span>
+                            {% endfor %}
                         </div>
                     </div>
-                    <div class="control-group">
+                    <div class="control-group {% if login_form.errors.password %} error {% endif %}">
                         <label class="control-label">Password</label>
                         <div class="controls">
                             {{ login_form.password(class="input-xlarge", size=80) }}
+{% for error in login_form.errors.password %}
+                            <span class="help-inline">{{error}}</span>
+                            {% endfor %}
+
                         </div>
                     </div>
                     <div class="control-group">
                         <div class="controls">
-                            <label class="control-label">Remember Me</label>
-                            {{ login_form.remember_me }}
+                            <label class="checkbox">
+                                {{ login_form.remember_me }} Remember Me
+                            </label>
                         </div>
                     </div>
 

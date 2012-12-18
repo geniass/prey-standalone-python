@@ -314,8 +314,9 @@ def reports_xml(device_id):
         user = users_collection.find_one(g.user._id)
         if device['api_key'] == user['api_key']:
             reports = reports_collection.find({'device_id': device_id})
+            print_stderr(reports.count)
             if reports.count == 0:
-                flash("There ar eno reports for this device", "warning")
+                flash("There are no reports for this device", "warning")
             return render_template('reports_basic.html', reports=reports)
         else:
             flash("Editing URL's? That's not your device!", "warning")

@@ -40,12 +40,12 @@
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
         {% for category, message in messages %}
-        <div class="alert {% if category is not "warning" %}alert-{{category}}{%endif%}">
-            {% if category is "error" %}
+        <div class="alert {% if category != "warning" %}alert-{{category}}{%endif%}">
+            {% if category == "error" %}
             <strong>Error! </strong> {{message}}
-            {% elif category is "warning" %}
+            {% elif category == "warning" %}
             <strong>Warning! </strong> {{message}}
-            {% elif category is "success" %}
+            {% elif category == "success" %}
             <strong>Success! </strong> {{message}}
             {% endif %}
         </div>

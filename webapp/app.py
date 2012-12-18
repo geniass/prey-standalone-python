@@ -110,22 +110,20 @@ def logout():
 @app.route('/users.xml', methods=['POST'])
 def users():
     if request.method == 'POST':
-        print_stderr("Users.xml Request.data: " + str(request.data))
-        print_stderr("Users.xml Other thing: " + str(request.form))
-
-        keyvalue = prey_params_dict(request.data)
+        #ohhhhhhhh... flask does the parsing for you
+        keyvalue = request.form
         print_stderr("POST Data (users.xml): " + str(keyvalue))
 
         user_dict = dict(dict.fromkeys(['name', 'email', 'pwd'], None))
 
         result = "<errors><error>%s</error><errors>"
 
-        if "user%5Bname%5D" in keyvalue:
-            user_dict['name'] = unquote(keyvalue["user%5Bname%5D"])
-        if "user%5Bemail%5D" in keyvalue:
-            user_dict['email'] = unquote(keyvalue["user%5Bemail%5D"])
-        if "user%5Bpassword%5D" in keyvalue:
-            user_dict['pwd'] = unquote(keyvalue["user%5Bpassword%5D"])
+        if "user[name]" in keyvalue:
+            user_dict['name'] = keyvalue["user[name]"]
+        if "user[email]" in keyvalue:
+            user_dict['email'] = keyvalue["user[email]"]
+        if "user[password]" in keyvalue:
+            user_dict['pwd'] = keyvalue["user[password]"]
 
         if all(x is not None for x in user_dict):
                 #VERIFY PWD ETC
@@ -158,14 +156,15 @@ account. Oh well"""
 @app.route('/devices.xml', methods=['POST'])
 def devices():
     if request.method == 'POST':
-        if not request.data:
+        """if not request.data:
             data = request.form.keys()[0]
         else:
             data = request.data
 
         print_stderr("POST data (devices.xml): " + str(data))
 
-        keyvalue = prey_params_dict(data)
+        keyvalue = prey_params_dict(data)"""
+        keyvalue = request.form
         device = {}
         device_id = None
 
@@ -175,22 +174,22 @@ def devices():
         while True:
             device_id = random_string(5)
             if devices_collection.find_one({"device_id": device_id}) is None:
-                if "device%5Bmodel_name%5D" in keyvalue:
-                    device['model'] = keyvalue["device%5Bmodel_name%5D"]
-                if "device%5Bvendor_name%5D" in keyvalue:
-                    device['vendor'] = keyvalue["device%5Bvendor_name%5D"]
-                if "device%5Bactivation_phrase%5D" in keyvalue:
-                    device['activation_phrase'] = keyvalue["device%5Bactivation_phrase%5D"].replace("%20", " ")
-                if "device%5Bdeactivation_phrase%5D" in keyvalue:
-                    device['deactivation_phrase'] = keyvalue["device%5Bdeactivation_phrase%5D"].replace("%20", " ")
-                if "device%5Bos_version%5D" in keyvalue:
-                    device['os_version'] = keyvalue["device%5Bos_version%5D"]
-                if "device%5Bos%5D" in keyvalue:
-                    device['os'] = keyvalue["device%5Bos%5D"]
+                if "device[model_name]" in keyvalue:
+                    device['model'] = keyvalue["device[model_name]"]
+                if "device[vendor_name]" in keyvalue:
+                    device['vendor'] = keyvalue["device[vendor_name]"]
+                if "device[activation_phrase]" in keyvalue:
+                    device['activation_phrase'] = keyvalue["device[activation_phrase]"]
+                if "device[deactivation_phrase]" in keyvalue:
+                    device['deactivation_phrase'] = keyvalue["device[deactivation_phrase]"]
+                if "device[os_version]" in keyvalue:
+                    device['os_version'] = keyvalue["device[os_version]"]
+                if "device[os]" in keyvalue:
+                    device['os'] = keyvalue["device[os]"]
                 if "api_key" in keyvalue:
                     device['api_key'] = keyvalue["api_key"]
-                if "device%5Bphysical_address%5D" in keyvalue:
-                    device['imei'] = keyvalue["device%5Bphysical_address%5D"]
+                if "device[physical_address]" in keyvalue:
+                    device['imei'] = keyvalue["device[physical_address]"]
 
                 device['device_id'] = device_id
                 device['missing'] = False
@@ -245,16 +244,17 @@ def device(device_id):
         return tostring(root)
 
     elif request.method == 'POST':
-        keyvalue = prey_params_dict(request.data)
+        #keyvalue = prey_params_dict(request.data)
+        keyvalue = request.form
         device = {}
 
         print_stderr("Post Data (devices/[id].xml):" + str(keyvalue))
 
-        if 'device%5Bnotification_id%5D' in keyvalue:
-            device['notification_id'] = keyvalue['device%5Bnotification_id%5D']
+        if 'device[notification_id]' in keyvalue:
+            device['notification_id'] = keyvalue['device[notification_id]']
             print_stderr("REG: " + str(device['notification_id']))
-        if 'device%5Bmissing%5D' in keyvalue:
-            device['missing'] = keyvalue['device%5Bmissing%5D']
+        if 'device[missing]' in keyvalue:
+            device['missing'] = keyvalue['device[missing]']
             print_stderr("Device missing changed to: " + device['missing'])
         if 'api_key' in keyvalue:
             device['api_key'] = keyvalue['api_key']
@@ -286,26 +286,26 @@ def reports_xml(device_id):
             return redirect('/')
 
     elif request.method == 'POST':
-        print_stderr("reports.xml")
-        print_stderr("Post Data (devices/[id].xml):" + str(request.data))
-        if not request.data:
+        keyvalue = request.form
+        print_stderr("Post Data (devices/" + str(device_id) + "/reports.xml):" + str(keyvalue))
+        """if not request.data:
             data = request.form.keys()[0]
         else:
             data = request.data
 
-        keyvalue = prey_params_dict(data)
+        keyvalue = prey_params_dict(data)"""
 
         report = {}
 
         #GEO LOCATION
-        if 'geo%5Blat%5D' in keyvalue:
-            report['latitude'] = keyvalue['geo%5Blat%5D']
-        if 'geo%5Blng%5D' in keyvalue:
-            report['longitude'] = keyvalue['geo%5Blng%5D']
-        if 'geo%5Balt%5D' in keyvalue:
-            report['altitude'] = keyvalue['geo%5Balt%5D']
-        if 'geo%5Bacc%5D' in keyvalue:
-            report['accuracy'] = keyvalue['geo%5Bacc%5D']
+        if 'geo[lat]' in keyvalue:
+            report['latitude'] = keyvalue['geo[lat]']
+        if 'geo[lng]' in keyvalue:
+            report['longitude'] = keyvalue['geo[lng]']
+        if 'geo[alt]' in keyvalue:
+            report['altitude'] = keyvalue['geo[alt]']
+        if 'geo[acc]' in keyvalue:
+            report['accuracy'] = keyvalue['geo[acc]']
 
         report['utc_time'] = datetime.datetime.utcnow()
 
@@ -352,14 +352,18 @@ def missing(device_id):
 
         return "<div>" + r.text + "</div>"
     else:
-        return "<div>This device is not in the database</div>"
-
+        flash("This device is not in the database")
+        return redirect("/devices/" + str(device_id) + "/missing")
 
 @app.route('/profile.xml', methods=['GET'])
 def profile():
     if request.method == 'GET':
         #ADD HTTP BASIC AUTH
         print_stderr("Get Params (profile.xml): " + str(request.args.items()))
+
+        #root = ET.Element("user")
+        
+
         return """<?xml version="1.0" encoding="UTF-8"?>
                     <user>
                     <id>1078832</id>

@@ -83,7 +83,7 @@ def homepage():
 @login_required
 def reports_page():
     devices = devices_collection.find()
-    return render_template('reports-devices.html', devices=devices)
+    return render_template('reports_devices.html', devices=devices)
 
 
 @app.route('/getreport')

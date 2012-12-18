@@ -76,6 +76,7 @@ def before_request():
 @app.route('/')
 def homepage():
     devices = devices_collection.find()
+    print_stderr(devices)
     return render_template('index.html', devices=devices)
 
 

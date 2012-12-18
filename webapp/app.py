@@ -83,9 +83,17 @@ def homepage():
 @app.route('/reports')
 @login_required
 def reports_page():
-    api_key = users_collection.find_one({"email": g.user.email})['api_key']
+    api_key = users_collection.find_one(g.user._id)['api_key']
     devices = devices_collection.find({"api_key": api_key})
     return render_template('reports_devices.html', devices=devices)
+
+
+@app.route('/missing')
+@login_required
+def missing_page():
+    api_key = users_collection.find_one(g.user._id)['api_key']
+    devices = devices_collection.find({"api_key": api_key})
+    return render_template('missing_devices.html', devices=devices)
 
 
 @app.route('/getreport')
@@ -306,7 +314,6 @@ def reports_xml(device_id):
         user = users_collection.find_one(g.user._id)
         if device['api_key'] == user['api_key']:
             reports = reports_collection.find({'device_id': device_id})
-            print_stderr(reports[0])
             return render_template('reports_basic.html', reports=reports)
         else:
             flash("Editing URL's? That's not your device!", "warning")

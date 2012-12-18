@@ -83,7 +83,7 @@ def homepage():
 @app.route('/reports')
 @login_required
 def reports_page():
-    api_key = users_collection.find_one({"email": g.user.email})
+    api_key = users_collection.find_one({"email": g.user.email})['api_key']
     devices = devices_collection.find({"api_key": api_key})
     return render_template('reports_devices.html', devices=devices)
 
